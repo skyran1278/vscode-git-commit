@@ -21,6 +21,22 @@
         "icon": "$(sparkle)"
       }
     ],
+    "configuration": {
+      "title": "Git Commit",
+      "properties": {
+        "git-commit.method": {
+          "type": "string",
+          "enum": ["auto", "vscode-lm", "claude-cli"],
+          "default": "auto",
+          "description": "How to generate commit messages. `auto` tries vscode.lm first, falls back to Claude CLI. `vscode-lm` requires a model provider (e.g. GitHub Copilot). `claude-cli` requires the `claude` CLI on PATH."
+        },
+        "git-commit.modelFamily": {
+          "type": "string",
+          "default": "",
+          "description": "Language model family to use when method is `vscode-lm` or `auto` (e.g. `gpt-4o`, `claude-sonnet`). Leave empty to use any available model."
+        }
+      }
+    },
     "menus": {
       "scm/title": [
         {
