@@ -3,8 +3,9 @@ import type { ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import { Writable } from 'stream';
 
-import { ClaudeCliStrategy, generateCommitMessage, LLMStrategy } from '../generate';
+import { generateCommitMessage } from '../generate';
 import type { CommitContext } from '../generate';
+import { ClaudeCliStrategy, LLMStrategy } from '../strategies';
 
 const DEFAULT_CONTEXT: CommitContext = {
   diff: 'diff content',

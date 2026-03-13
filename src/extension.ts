@@ -1,12 +1,13 @@
 import * as vscode from 'vscode';
 
+import { generateCommitMessage } from './generate';
+import { getGitContext } from './git';
 import {
   ClaudeCliStrategy,
-  generateCommitMessage,
   LLMStrategy,
   PerplexityStrategy,
-} from './generate';
-import { getGitContext } from './git';
+  VscodeLmStrategy,
+} from './strategies';
 
 interface Repository {
   rootUri: vscode.Uri;
@@ -17,26 +18,6 @@ interface Repository {
 interface GitAPI {
   repositories: Repository[];
   getRepository(uri: vscode.Uri): Repository | null;
-}
-
-class VscodeLmStrategy implements LLMStrategy {
-  constructor(
-    private readonly model: vscode.LanguageModelChat,
-    private readonly token: vscode.CancellationToken,
-  ) {}
-
-  async sendRequest(prompt: string): Promise<string> {
-    const response = await this.model.sendRequest(
-      [vscode.LanguageModelChatMessage.User(prompt)],
-      {},
-      this.token,
-    );
-    let text = '';
-    for await (const chunk of response.text) {
-      text += chunk;
-    }
-    return text;
-  }
 }
 
 async function createStrategy(
