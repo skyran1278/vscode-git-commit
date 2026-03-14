@@ -19,11 +19,18 @@ To run only the unit tests (no VSCode host needed), compile first then run the t
 
 ## Architecture
 
-This is a VSCode extension with two source files:
+- **[src/extension.ts](src/extension.ts)** — VSCode entry point. Registers `ranCommit.generateCommit` (sparkle icon in SCM title bar) and `ranCommit.storePerplexityApiKey`. Resolves the active git repo via `vscode.git`, fetches staged diff (falling back to unstaged), then delegates to `generateCommitMessage`.
 
-- **[src/extension.ts](src/extension.ts)** — VSCode entry point. Registers the `ranCommit.generateCommit` command, which appears as a sparkle icon in the SCM title bar. On invocation it resolves the active git repo via the built-in `vscode.git` extension API, fetches the staged diff (falling back to unstaged), and calls `generateCommitMessage`.
+- **[src/generate.ts](src/generate.ts)** — Selects and invokes the appropriate LLM strategy based on `ranCommit.method` setting (`auto` | `vscode-lm` | `claude-cli` | `perplexity`). `auto` tries vscode-lm first, falls back to claude-cli. The `_impl.spawnFn` export is the seam for unit test injection.
 
-- **[src/generate.ts](src/generate.ts)** — Core logic. Spawns the `claude` CLI (`@anthropic-ai/claude-code`) as a subprocess, pipes the diff as a prompt, and returns the trimmed stdout as the commit message. The `_impl.spawnFn` export is the seam used by unit tests to inject a fake spawn without needing VSCode.
+- **[src/git.ts](src/git.ts)** — Git utilities (diff fetching, repo resolution).
+
+- **[src/strategies/](src/strategies/)** — Strategy pattern for LLM backends:
+  - `claude-cli.ts` — Spawns `claude` CLI subprocess; respects `modelFamily` setting
+  - `vscode-lm.ts` — Uses `vscode.lm` API; filters by `modelVendor`/`modelFamily`
+  - `perplexity.ts` — Calls Perplexity API; API key stored via `ranCommit.storePerplexityApiKey`
+
+**Settings**: `ranCommit.method`, `ranCommit.modelFamily`, `ranCommit.modelVendor`
 
 **Build**: esbuild bundles `src/extension.ts` → `dist/extension.js` (CJS, `vscode` externalized). Tests compile via `tsc` to `out/` and run via `@vscode/test-cli`.
 
@@ -34,4 +41,4 @@ This is a VSCode extension with two source files:
 
 ## Key constraint
 
-The extension depends on the `claude` CLI being available on `PATH` at runtime. If not found (`ENOENT`), the extension surfaces a user-facing error with installation instructions.
+`claude-cli` strategy requires the `claude` CLI on `PATH` (`ENOENT` surfaces a user-facing error). `perplexity` requires an API key stored via the `storePerplexityApiKey` command.
