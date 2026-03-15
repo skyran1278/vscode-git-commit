@@ -11,20 +11,18 @@ export interface CommitContext {
 export function buildPrompt(context: CommitContext): string {
   return `## Context
 
-- Current git status:
-${context.status}
-
-- Current git diff (staged and unstaged changes):
+- Current git diff:
 ${context.diff}
 
 - Current branch: ${context.branch}
 
 - Recent commits:
 ${context.log}
-${context.userMessage ? `\n- User instructions:\n${context.userMessage}` : ''}
+${context.userMessage ? `\n- User instructions:\n${context.userMessage}\n` : ''}
 ## Your task
 
-Based on the above changes and commit history style, generate a single commit message. Output only the commit message, no code fences.`;
+Generate a single git commit message for the above diff. Follow the style of the recent commits.
+Output only the commit message with no code fences, quotes, or explanation.`;
 }
 
 export async function generateCommitMessage(
