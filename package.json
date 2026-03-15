@@ -1,9 +1,10 @@
 {
   "name": "ran-commit",
-  "displayName": "Ran - Git Commit",
-  "description": "AI-powered git commit message generator",
-  "version": "0.0.2",
+  "displayName": "Ran - Commit Message Generator",
+  "description": "AI-powered git commit message generator using claude-cli, perplexity, vscode",
+  "version": "0.0.3",
   "publisher": "skyran",
+  "icon": "icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/skyran1278/vscode-git-commit.git"
@@ -12,7 +13,8 @@
     "vscode": "^1.110.0"
   },
   "categories": [
-    "Other"
+    "AI",
+    "SCM Providers"
   ],
   "activationEvents": [
     "onStartupFinished"
