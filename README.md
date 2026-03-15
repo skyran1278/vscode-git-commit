@@ -29,9 +29,3 @@ Depending on your chosen method:
 1. Stage your changes in the Source Control panel (or leave them unstaged — the extension will use the full diff as a fallback).
 2. Click the **✨ sparkle icon** in the SCM title bar.
 3. The generated commit message is inserted into the commit message box, ready to edit or submit.
-
-## Release Notes
-
-### 0.0.1
-
-Initial release — one-click commit message generation via Claude CLI, VS Code LM API, and Perplexity AI.
