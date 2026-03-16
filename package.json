@@ -4,6 +4,16 @@
   "description": "AI-powered git commit message generator using claude-cli, perplexity, vscode",
   "version": "0.0.7",
   "publisher": "skyran",
+  "keywords": [
+    "git",
+    "commit",
+    "ai",
+    "claude",
+    "perplexity",
+    "copilot",
+    "scm",
+    "conventional-commits"
+  ],
   "icon": "images/icon.png",
   "repository": {
     "type": "git",
