@@ -12,3 +12,16 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+.pnpm-store/**
+.claude/**
+.husky/**
+.npmrc
+.prettierignore
+.prettierrc.mjs
+.lintstagedrc.json
+.release-it.json
+commitlint.config.mjs
+pnpm-lock.yaml
+AGENTS.md
+CLAUDE.md
+scripts/**
