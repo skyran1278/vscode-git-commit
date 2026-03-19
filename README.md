@@ -7,6 +7,7 @@ AI-powered git commit message generator for VS Code. Click the sparkle icon (✨
 - **One-click generation** — sparkle button in the SCM title bar generates a commit message from your staged (or unstaged) diff
 - **Multiple AI backends** — works with GitHub Copilot, Claude CLI, Perplexity AI, or any VS Code LM provider
 - **Smart fallback** — `auto` mode tries the VS Code language model API first, then falls back to the Claude CLI
+- **Style-aware** — follows the style of your recent commits; falls back to [Conventional Commits](https://www.conventionalcommits.org/) format (e.g. `feat: ...`, `fix: ...`, `chore: ...`) when no clear style is established
 
 ## Requirements
 

@@ -21,7 +21,7 @@ ${context.log}
 ${context.userMessage ? `\n- User instructions:\n${context.userMessage}\n` : ''}
 ## Your task
 
-Generate a single git commit message for the above diff. Follow the style of the recent commits.
+Generate a single git commit message for the above diff. Follow the style of the recent commits. If the recent commits don't follow a clear style, use the Conventional Commits format (e.g. feat: ..., fix: ..., chore: ...).
 Output only the commit message with no code fences, quotes, or explanation.`;
 }
 
