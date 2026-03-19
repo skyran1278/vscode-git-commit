@@ -7,11 +7,7 @@
       "pnpm format",
       "pnpm test"
     ],
-    "after:bump": "node scripts/generate-changelog.mjs ${version}",
-    "after:release": [
-      "pnpm dlx @vscode/vsce package --no-dependencies",
-      "pnpm dlx @vscode/vsce publish --no-dependencies"
-    ]
+    "after:bump": "node scripts/generate-changelog.mjs ${version}"
   },
   "git": {
     "commitMessage": "chore: release v${version}"
