@@ -6,6 +6,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.11]
+
+- Improved commit message generation with detailed conventional commits rules (type, scope, subject, body, footer guidelines)
+- Cleaner, more readable prompt formatting for better LLM output consistency
+
 ## [0.0.10]
 
 - Improved commit message generation with detailed conventional commits rules (feat, fix, chore, ci, docs, etc.) for more consistent and structured output
