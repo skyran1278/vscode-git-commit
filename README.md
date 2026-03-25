@@ -8,6 +8,8 @@ AI-powered git commit message generator for VS Code. Click the sparkle icon (✨
 - **Multiple AI backends** — works with GitHub Copilot, Claude CLI, Perplexity AI, or any VS Code LM provider
 - **Smart fallback** — `auto` mode tries the VS Code language model API first, then falls back to the Claude CLI
 - **Style-aware** — follows the style of your recent commits; falls back to [Conventional Commits](https://www.conventionalcommits.org/) format (e.g. `feat: ...`, `fix: ...`, `chore: ...`) when no clear style is established
+- **Respects your commitlint config** — automatically reads your project's commitlint configuration (including `extends` chains) and adapts generated messages to follow your rules (custom types, scopes, line lengths, etc.)
+- **Respects VS Code git settings** — honors `git.inputValidationSubjectLength` and `git.inputValidationLength` for subject and body line length limits
 
 ## Requirements
 
