@@ -138,6 +138,15 @@ export function activate(context: vscode.ExtensionContext) {
           }
 
           try {
+            const gitCfg = vscode.workspace.getConfiguration('git');
+            gitContext.subjectLength = gitCfg.get<number>(
+              'inputValidationSubjectLength',
+              50,
+            );
+            gitContext.lineLength = gitCfg.get<number>(
+              'inputValidationLength',
+              72,
+            );
             if (commitlintRules) {
               gitContext.commitlintRules = commitlintRules;
             }

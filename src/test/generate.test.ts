@@ -201,6 +201,49 @@ suite('buildPrompt with commitlintRules', () => {
     assert.ok(prompt.includes('must not end with "."'));
   });
 
+  test('commitlint headerMaxLength overrides subjectLength', () => {
+    const prompt = buildPrompt({
+      ...DEFAULT_CONTEXT,
+      subjectLength: 50,
+      commitlintRules: { headerMaxLength: 100 },
+    });
+    assert.ok(prompt.includes('≤ 100 characters'));
+    assert.ok(!prompt.includes('≤ 50 characters'));
+  });
+
+  test('commitlint bodyMaxLineLength overrides lineLength', () => {
+    const prompt = buildPrompt({
+      ...DEFAULT_CONTEXT,
+      lineLength: 72,
+      commitlintRules: { bodyMaxLineLength: 120 },
+    });
+    assert.ok(prompt.includes('≤ 120 characters'));
+    assert.ok(!prompt.includes('≤ 72 characters'));
+  });
+});
+
+suite('buildPrompt with VSCode git settings', () => {
+  test('includes subjectLength in prompt', () => {
+    const prompt = buildPrompt({
+      ...DEFAULT_CONTEXT,
+      subjectLength: 50,
+    });
+    assert.ok(prompt.includes('Subject line ≤ 50 characters'));
+  });
+
+  test('includes lineLength in prompt', () => {
+    const prompt = buildPrompt({
+      ...DEFAULT_CONTEXT,
+      lineLength: 72,
+    });
+    assert.ok(prompt.includes('Body lines ≤ 72 characters'));
+  });
+
+  test('no length rules when neither set', () => {
+    const prompt = buildPrompt(DEFAULT_CONTEXT);
+    assert.ok(!prompt.includes('Subject line'));
+    assert.ok(!prompt.includes('Body lines'));
+  });
   test('no project rules section without commitlint config', () => {
     const prompt = buildPrompt(DEFAULT_CONTEXT);
     assert.ok(!prompt.includes('Project Rules'));

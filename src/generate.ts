@@ -8,6 +8,8 @@ export interface CommitContext {
   log: string;
   userMessage?: string;
   commitlintRules?: CommitlintRules;
+  subjectLength?: number;
+  lineLength?: number;
 }
 
 const DEFAULT_TYPES = [
@@ -68,6 +70,12 @@ export function buildPrompt(context: CommitContext): string {
   const types = rules?.types ?? DEFAULT_TYPES;
   const projectRules = rules ? commitlintSection(rules) : '';
 
+  const headerMax = rules?.headerMaxLength ?? context.subjectLength;
+  const bodyMax = rules?.bodyMaxLineLength ?? context.lineLength;
+  const lengthRules =
+    (headerMax ? `\n- Subject line ≤ ${headerMax} characters` : '') +
+    (bodyMax ? `\n- Body lines ≤ ${bodyMax} characters` : '');
+
   return `## Conventional Commits
 
 ### Format
@@ -92,7 +100,7 @@ Use one of: ${types.join(', ')}
 
 - Separate description from body with a blank line
 - Footer uses git trailer format: \`Token: value\` or \`Token #value\`
-- BREAKING CHANGE footer must be uppercase
+- BREAKING CHANGE footer must be uppercase${lengthRules}
 
 ### Examples
 
