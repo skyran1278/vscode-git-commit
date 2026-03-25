@@ -1,6 +1,6 @@
 {
   "name": "ran-commit",
-  "displayName": "Ran - Commit Message Generator",
+  "displayName": "Ran - AI Conventional Commit",
   "description": "AI-powered git commit message generator using claude-cli, perplexity, vscode",
   "version": "0.0.12",
   "publisher": "skyran",
@@ -39,11 +39,11 @@
       },
       {
         "command": "ranCommit.storePerplexityApiKey",
-        "title": "Ran Commit: Store Perplexity API Key"
+        "title": "Ran - AI Conventional Commit: Store Perplexity API Key"
       }
     ],
     "configuration": {
-      "title": "Ran Commit",
+      "title": "Ran - AI Conventional Commit",
       "properties": {
         "ranCommit.method": {
           "type": "string",
