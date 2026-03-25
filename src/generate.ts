@@ -9,7 +9,86 @@ export interface CommitContext {
 }
 
 export function buildPrompt(context: CommitContext): string {
-  return `## Context
+  return `## Conventional Commits
+
+### Format
+
+\`\`\`
+<type>[optional scope]: <short description>
+
+- explain the motivation behind this change
+\`\`\`
+
+### Type Choices
+
+Use one of: fix, feat, build, chore, ci, docs, style, refactor, perf, test
+
+- feat: adds a new feature
+- fix: represents a bug fix
+- BREAKING CHANGE: add ! before : in type/scope, or include BREAKING CHANGE: footer
+  - signals when: removing/renaming public fields or functions, changing function signatures, removing supported values
+
+### Guidelines
+
+**description:**
+
+- imperative, present tense, lowercase start, no period
+- immediately follows the colon and space
+
+**body** (include by default; omit only for trivial changes like typo fixes):
+
+- blank line after description
+- use dashes (-) for bullet points
+- imperative, present tense, lowercase start, no period
+- each line ≤ 80 characters
+- explain the motivation (WHY), not just what changed
+
+**footer (optional):**
+
+- one blank line after body
+- token format: Token: value or Token #value
+- BREAKING CHANGE MUST be uppercase
+
+### Examples
+
+\`\`\`
+fix(auth): add refresh token logic
+
+- users were unexpectedly logged out when token expired silently
+\`\`\`
+
+\`\`\`
+refactor(api)!: split User name into firstName and lastName
+
+- downstream callers reading user.name will break; must migrate to firstName/lastName
+\`\`\`
+
+### Validation Checklist
+
+- type is one of the allowed types
+- scope (if used) is a noun in parentheses
+- description is lowercase, imperative, no trailing period
+- body begins with a blank line after description
+- body uses - bullet points (never prose paragraphs)
+- every line ≤ 80 characters
+- breaking changes marked with ! or BREAKING CHANGE: footer
+
+### Common Mistakes
+
+| Mistake | Fix |
+| feat: Added new button | feat: add new button (imperative, lowercase) |
+| fix: fixed bug. | fix: fix bug (no period, imperative) |
+| Body immediately after description | Add blank line between description and body |
+| Line > 80 chars | Break into multiple lines |
+| breaking change: in footer | Must be BREAKING CHANGE: (uppercase) |
+| No body on non-trivial change | Add body explaining motivation (WHY) |
+| Body written as prose paragraph | Use - bullet points instead |
+| feat!(scope): ... — ! before scope | ! goes after scope: feat(scope)!: ... |
+| feat!: ... — ! before colon, no scope | feat!: ... ✅ (no scope) |
+| Renamed/removed public field with no ! | Add ! after type/scope: refactor(api)!: ... |
+| Changed function signature with no ! | Add ! after type/scope: feat(auth)!: ... |
+
+## Context
 
 - Current git diff:
 ${context.diff}
@@ -23,75 +102,7 @@ ${context.userMessage ? `\n- User instructions:\n${context.userMessage}\n` : ''}
 
 Generate a single git commit message for the above diff.
 Follow the style of the recent commits.
-If the recent commits don't follow a clear style, use the Conventional Commits format below.
-
-### Format
-
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer]
-
-### Allowed types
-
-- feat: new feature
-- fix: bug fix
-- refactor: code change that neither fixes a bug nor adds a feature
-- perf: performance improvement
-- style: formatting, whitespace, missing semicolons (no logic change)
-- docs: documentation only
-- test: adding or correcting tests
-- build: build system or external dependencies
-- ci: CI configuration
-- chore: maintenance tasks
-- revert: revert a previous commit
-
-### Description rules
-
-- imperative, present tense, lowercase start, no trailing period
-- immediately follows the colon and space
-- header (type + scope + description) max 100 characters
-
-### Body rules
-
-- include body by default; omit only for trivial changes (typo fixes)
-- blank line after description
-- use "- " bullet points, never prose paragraphs
-- imperative, present tense
-- each line ≤ 80 characters
-- explain the motivation (WHY), not just what changed
-
-### Breaking changes
-
-- add "!" after type/scope before ":" (e.g. feat! or refactor(api)!)
-- or add a "BREAKING CHANGE:" footer (must be uppercase)
-- required when: removing/renaming public fields or functions, changing function signatures, removing supported values
-
-### Footer (optional)
-
-- one blank line after body
-- format: "Token: value" or "Token #value"
-
-### Examples
-
-fix(auth): add refresh token logic
-
-- users were unexpectedly logged out when token expired silently
-
-refactor(api)!: split User name into firstName and lastName
-
-- downstream callers reading user.name will break; must migrate to firstName/lastName
-
-### Common mistakes to avoid
-
-- past tense ("Added", "Fixed") — use imperative ("add", "fix")
-- trailing period in description
-- body written as prose paragraph — use bullet points
-- no body on non-trivial changes — always explain WHY
-- "!" placed before scope — "!" goes after scope: feat(scope)!: ...
-- lines exceeding 80 characters in body
-
+If the recent commits don't follow a clear style, use the Conventional Commits format above.
 Output only the commit message with no code fences, quotes, or explanation.`;
 }
 
