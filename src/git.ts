@@ -30,7 +30,7 @@ export async function getGitContext(
     repo.diff(false),
     execGit(repoPath, ['status']),
     execGit(repoPath, ['branch', '--show-current']),
-    execGit(repoPath, ['log', '--oneline', '-10']),
+    execGit(repoPath, ['log', '-10']),
   ]);
   const diff = staged || unstaged;
   if (!diff) {
