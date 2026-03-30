@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.15]
+
+- Added Gemini 3.1 Pro Preview and Gemini 3 Flash Preview as selectable model options
+
 ## [0.0.14]
 
 - Add **Select Model** command to switch LLM models per method (Claude CLI, Perplexity, VS Code LM) without opening settings
