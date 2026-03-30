@@ -21,11 +21,14 @@ Depending on your chosen method:
 
 ## Extension Settings
 
-| Setting                 | Default     | Description                                                                                                                                                                                                            |
-| ----------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ranCommit.method`      | `auto`      | Generation method: `auto`, `vscode-lm`, `claude-cli`, or `perplexity`                                                                                                                                                  |
-| `ranCommit.modelFamily` | _(default)_ | Model family/name. For `vscode-lm`/`auto`: filter by family (e.g. `gpt-4o`, `claude-sonnet`). For `claude-cli`: model family passed to the CLI. For `perplexity`: model name portion of `vendor/model` (e.g. `sonar`). |
-| `ranCommit.modelVendor` | _(default)_ | Model vendor. For `vscode-lm`/`auto`: filter by vendor (e.g. `copilot`, `anthropic`). For `perplexity`: vendor prefix in `vendor/model` (e.g. `perplexity`). Not used by `claude-cli`.                                 |
+| Setting                     | Default     | Description                                                                                                                           |
+| --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `ranCommit.method`          | `auto`      | Generation method: `auto`, `vscode-lm`, `claude-cli`, or `perplexity`                                                                 |
+| `ranCommit.claudeCliModel`  | _(default)_ | Model alias for `claude-cli` (e.g. `sonnet`, `opus`, `haiku`). See [model config docs](https://code.claude.com/docs/en/model-config). |
+| `ranCommit.perplexityModel` | _(default)_ | Perplexity Agent API model (e.g. `perplexity/sonar`). See [Perplexity models](https://docs.perplexity.ai/docs/agent-api/models).      |
+| `ranCommit.vscodeLmModel`   | _(default)_ | Model for `vscode-lm` / `auto`. Format: `vendor/family` (e.g. `copilot/gpt-4o`).                                                      |
+
+Use the **Ran - AI Conventional Commit: Select Model** command to pick a model interactively.
 
 ## Usage
 

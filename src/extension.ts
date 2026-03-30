@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { loadCommitlintRules } from './commitlint';
 import { generateCommitMessage } from './generate';
 import { getGitContext } from './git';
+import { selectModel } from './models';
 import {
   ClaudeCliStrategy,
   LLMStrategy,
@@ -36,21 +37,32 @@ async function promptForApiKey(
   return key || undefined;
 }
 
+function parseVscodeLmSelector(model: string): {
+  vendor?: string;
+  family?: string;
+} {
+  if (!model) {
+    return {};
+  }
+  const idx = model.indexOf('/');
+  if (idx === -1) {
+    return { family: model };
+  }
+  const vendor = model.slice(0, idx) || undefined;
+  const family = model.slice(idx + 1) || undefined;
+  return { ...(vendor ? { vendor } : {}), ...(family ? { family } : {}) };
+}
+
 async function createStrategy(
   token: vscode.CancellationToken,
   context: vscode.ExtensionContext,
 ): Promise<LLMStrategy | null> {
   const cfg = vscode.workspace.getConfiguration('ranCommit');
   const method = cfg.get<string>('method', 'auto');
-  const family = cfg.get<string>('modelFamily', '');
-  const vendor = cfg.get<string>('modelVendor', '');
-  const selector = {
-    ...(vendor ? { vendor } : {}),
-    ...(family ? { family } : {}),
-  };
 
   if (method === 'claude-cli') {
-    return new ClaudeCliStrategy(family || undefined);
+    const model = cfg.get<string>('claudeCliModel', '') || undefined;
+    return new ClaudeCliStrategy(model);
   }
 
   if (method === 'perplexity') {
@@ -61,10 +73,11 @@ async function createStrategy(
         return null;
       }
     }
-    const model =
-      vendor && family ? `${vendor}/${family}` : family || undefined;
+    const model = cfg.get<string>('perplexityModel', '') || undefined;
     return new PerplexityStrategy(apiKey, model);
   }
+
+  const selector = parseVscodeLmSelector(cfg.get<string>('vscodeLmModel', ''));
 
   if (method === 'vscode-lm') {
     const models = await vscode.lm.selectChatModels(selector);
@@ -82,7 +95,8 @@ async function createStrategy(
   if (models[0]) {
     return new VscodeLmStrategy(models[0], token);
   }
-  return new ClaudeCliStrategy(family || undefined);
+  const cliModel = cfg.get<string>('claudeCliModel', '') || undefined;
+  return new ClaudeCliStrategy(cliModel);
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -90,6 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand('ranCommit.storePerplexityApiKey', () =>
       promptForApiKey(context),
     ),
+    vscode.commands.registerCommand('ranCommit.selectModel', selectModel),
   );
 
   const disposable = vscode.commands.registerCommand(

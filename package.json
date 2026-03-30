@@ -40,6 +40,10 @@
       {
         "command": "ranCommit.storePerplexityApiKey",
         "title": "Ran - AI Conventional Commit: Store Perplexity API Key"
+      },
+      {
+        "command": "ranCommit.selectModel",
+        "title": "Ran - AI Conventional Commit: Select Model"
       }
     ],
     "configuration": {
@@ -56,15 +60,54 @@
           "default": "auto",
           "description": "How to generate commit messages. `auto` tries vscode.lm first, falls back to Claude CLI. `vscode-lm` requires a model provider (e.g. GitHub Copilot). `claude-cli` requires the `claude` CLI on PATH. `perplexity` uses the Perplexity API (set key via 'Git Commit: Store Perplexity API Key')."
         },
-        "ranCommit.modelFamily": {
+        "ranCommit.claudeCliModel": {
           "type": "string",
+          "enum": [
+            "",
+            "sonnet",
+            "opus",
+            "haiku",
+            "sonnet[1m]",
+            "opus[1m]",
+            "opusplan"
+          ],
+          "enumItemLabels": [
+            "Default",
+            "Sonnet",
+            "Opus",
+            "Haiku",
+            "Sonnet (1M context)",
+            "Opus (1M context)",
+            "Opus Plan"
+          ],
           "default": "",
-          "description": "Model family/name to use. For `vscode-lm`/`auto`: filters available models (e.g. `gpt-4o`, `claude-sonnet`). For `claude-cli`: passed as the model family. For `perplexity`: the model name portion of `vendor/model` (e.g. `sonar`; default `perplexity/sonar`). Leave empty to use the default."
+          "markdownDescription": "Model alias to pass to `claude --model`. See [model config docs](https://code.claude.com/docs/en/model-config) for details."
         },
-        "ranCommit.modelVendor": {
+        "ranCommit.perplexityModel": {
+          "type": "string",
+          "enum": [
+            "",
+            "perplexity/sonar",
+            "anthropic/claude-sonnet-4-6",
+            "anthropic/claude-opus-4-6",
+            "openai/gpt-5.4",
+            "google/gemini-2.5-pro"
+          ],
+          "enumItemLabels": [
+            "Default (perplexity/sonar)",
+            "Perplexity Sonar",
+            "Claude Sonnet 4.6",
+            "Claude Opus 4.6",
+            "GPT-5.4",
+            "Gemini 2.5 Pro"
+          ],
+          "default": "",
+          "markdownDescription": "Perplexity Agent API model. See [Perplexity models](https://docs.perplexity.ai/docs/agent-api/models) for the full list."
+        },
+        "ranCommit.vscodeLmModel": {
           "type": "string",
           "default": "",
-          "description": "Model vendor to use. For `vscode-lm`/`auto`: filters available models (e.g. `copilot`, `anthropic`). For `perplexity`: the vendor prefix in `vendor/model` (e.g. `perplexity`). Not used by `claude-cli`. Leave empty to use the default."
+          "markdownDescription": "Model for `vscode-lm` / `auto`. Format: `vendor/family` (e.g. `copilot/gpt-4o`). Use the **Select Model** command to pick from installed models. Leave empty to use any available model."
         }
       }
     },
