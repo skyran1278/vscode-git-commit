@@ -10,9 +10,13 @@ try {
     .toString()
     .trim()
     .split('\n');
-  lastTag = tags[1] ?? ''; // [0] = new tag just created by release-it, [1] = previous
+  lastTag = tags[0] ?? ''; // script runs on after:bump, before release-it creates the tag, so [0] = previous
 } catch {
   // No previous tags — fall through to use recent commits
+}
+
+if (process.env.DEBUG) {
+  console.log('[DEBUG] lastTag:', lastTag);
 }
 
 const range = lastTag ? `${lastTag}..HEAD` : 'HEAD~20..HEAD';
@@ -38,6 +42,10 @@ Commits:
 ${commits}
 
 Output ONLY the bullet points, no heading.`;
+
+if (process.env.DEBUG) {
+  console.log('[DEBUG] prompt:\n', prompt);
+}
 
 let entry = '';
 try {
