@@ -253,7 +253,9 @@ suite('buildPrompt with VSCode git settings', () => {
       ...DEFAULT_CONTEXT,
       subjectLength: 50,
     });
-    assert.ok(prompt.includes('Subject line ≤ 50 characters'));
+    assert.ok(
+      prompt.includes('Header (type + scope + description) ≤ 50 characters'),
+    );
   });
 
   test('includes lineLength in prompt', () => {

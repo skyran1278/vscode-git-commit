@@ -28,7 +28,7 @@ function makeFakeExecFile(results: Record<string, string>) {
 const DEFAULT_EXEC_RESULTS = {
   status: 'On branch main\nnothing to commit',
   'branch --show-current': 'main',
-  'log -10': 'abc1234 initial commit',
+  'log -10 --format=%B': 'abc1234 initial commit',
 };
 
 function makeRepo(staged: string, unstaged = '') {
@@ -93,7 +93,7 @@ suite('getGitContext', () => {
     await getGitContext(makeRepo('diff'));
     assert.ok(seen.includes('status'));
     assert.ok(seen.includes('branch --show-current'));
-    assert.ok(seen.includes('log -10'));
+    assert.ok(seen.includes('log -10 --format=%B'));
   });
 
   test('returns empty string from execGit on git error', async () => {
