@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.17]
+
+- Fixed repository selection when generating commit messages from the SCM context menu
+
 ## [0.0.16]
 
 - Fixed commit message generation to include the full message body in git log output
