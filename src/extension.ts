@@ -114,7 +114,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const disposable = vscode.commands.registerCommand(
     'ranCommit.generateCommit',
-    async () => {
+    async (scm?: vscode.SourceControl) => {
       const gitExt = vscode.extensions.getExtension<{
         getAPI(v: number): GitAPI;
       }>('vscode.git');
@@ -126,8 +126,9 @@ export function activate(context: vscode.ExtensionContext) {
       const api = gitExt.exports.getAPI(1);
       const activeEditor = vscode.window.activeTextEditor;
       const repo =
+        (scm?.rootUri && api.getRepository(scm.rootUri)) ??
         (activeEditor && api.getRepository(activeEditor.document.uri)) ??
-        api.repositories[0];
+        (api.repositories.length === 1 ? api.repositories[0] : null);
       if (!repo) {
         vscode.window.showErrorMessage('No git repository found');
         return;
