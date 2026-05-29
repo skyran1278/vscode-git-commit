@@ -6,10 +6,6 @@ settings:
 
 importers:
   .:
-    dependencies:
-      '@commitlint/lint':
-        specifier: ^21.0.1
-        version: 21.0.1
     devDependencies:
       '@commitlint/cli':
         specifier: ^20.4.4
@@ -17,6 +13,9 @@ importers:
       '@commitlint/config-conventional':
         specifier: ^20.4.4
         version: 20.4.4
+      '@commitlint/lint':
+        specifier: ^21.0.1
+        version: 21.0.1
       '@commitlint/load':
         specifier: ^21.0.1
         version: 21.0.1(@types/node@22.19.15)(typescript@5.9.3)
