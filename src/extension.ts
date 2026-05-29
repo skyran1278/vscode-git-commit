@@ -4,6 +4,7 @@ import { loadCommitlintRules } from './commitlint';
 import { buildPrompt, generateCommitMessage } from './generate';
 import { getGitContext } from './git';
 import { selectModel } from './models';
+import { resolveRules, validateMessage } from './validate';
 import {
   ClaudeCliStrategy,
   LLMStrategy,
@@ -136,7 +137,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       const userMessage = repo.inputBox.value.trim();
       const repoRoot = repo.rootUri.fsPath;
-      const [gitContext, commitlintRules] = await Promise.all([
+      const [gitContext, commitlint] = await Promise.all([
         getGitContext(repo, userMessage || undefined),
         loadCommitlintRules(repoRoot),
       ]);
@@ -168,11 +169,24 @@ export function activate(context: vscode.ExtensionContext) {
               'inputValidationLength',
               72,
             );
-            if (commitlintRules) {
-              gitContext.commitlintRules = commitlintRules;
+            if (commitlint?.parsed) {
+              gitContext.commitlintRules = commitlint.parsed;
             }
             outputChannel.debug(buildPrompt(gitContext));
-            const generated = await generateCommitMessage(gitContext, strategy);
+
+            const rules = await resolveRules({
+              rawRules: commitlint?.raw,
+              subjectLength: gitContext.subjectLength,
+              lineLength: gitContext.lineLength,
+            });
+            const generated = await generateCommitMessage(gitContext, strategy, {
+              validate: (message) => validateMessage(message, rules),
+              onWarnings: (warnings) => {
+                vscode.window.showWarningMessage(
+                  `Generated commit message may not follow all rules:\n- ${warnings.join('\n- ')}`,
+                );
+              },
+            });
             repo.inputBox.value = userMessage
               ? `${userMessage}\n\n${generated}`
               : generated;

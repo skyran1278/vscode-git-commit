@@ -145,6 +145,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.4.4",
     "@commitlint/config-conventional": "^20.4.4",
+    "@commitlint/load": "^21.0.1",
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.19.15",
@@ -161,5 +162,8 @@
     "release-it": "^19.2.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1"
+  },
+  "dependencies": {
+    "@commitlint/lint": "^21.0.1"
   }
 }

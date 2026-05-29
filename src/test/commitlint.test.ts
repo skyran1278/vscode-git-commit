@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { parseRules } from '../commitlint';
+import { loadCommitlintRules, parseRules } from '../commitlint';
 
 suite('parseRules', () => {
   test('extracts type-enum', () => {
@@ -89,6 +89,29 @@ suite('parseRules', () => {
     assert.strictEqual(result, undefined);
   });
 
+});
+
+suite('loadCommitlintRules', () => {
+  test('returns raw rules and parsed subset from the repo config', async () => {
+    const result = await loadCommitlintRules(process.cwd());
+    assert.ok(result, 'expected commitlint rules to load');
+    assert.ok(
+      result.raw && Object.keys(result.raw).length > 0,
+      'expected non-empty raw rules',
+    );
+    assert.ok(
+      result.parsed?.types && result.parsed.types.length > 0,
+      'expected parsed types from config-conventional',
+    );
+  });
+
+  test('returns undefined when the directory has no commitlint config', async () => {
+    const result = await loadCommitlintRules('/');
+    assert.strictEqual(result, undefined);
+  });
+});
+
+suite('parseRules extra', () => {
   test('extracts multiple rules together', () => {
     const result = parseRules({
       'type-enum': [2, 'always', ['feat', 'fix']],
