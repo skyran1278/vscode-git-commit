@@ -88,7 +88,6 @@ suite('parseRules', () => {
     } as any);
     assert.strictEqual(result, undefined);
   });
-
 });
 
 suite('loadCommitlintRules', () => {
