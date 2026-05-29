@@ -231,6 +231,25 @@ suite('generateCommitMessage validation + retry', () => {
     assert.strictEqual(result, 'first');
   });
 
+  test('returns the first attempt when a retry yields an empty response', async () => {
+    const validator = makeValidator([{ valid: false, problems: ['p1'] }]);
+    const { strategy } = makeSequentialStrategy([
+      'feat: usable first attempt',
+      '',
+    ]);
+    const warnings: string[][] = [];
+    const result = await generateCommitMessage(DEFAULT_CONTEXT, strategy, {
+      validate: validator,
+      onWarnings: (w) => warnings.push(w),
+    });
+    assert.strictEqual(
+      result,
+      'feat: usable first attempt',
+      'a flaky empty retry must not discard the usable first attempt',
+    );
+    assert.deepStrictEqual(warnings, [['p1']]);
+  });
+
   test('without a validator behaves as before (no validation, no retry)', async () => {
     const { strategy, prompts } = makeSequentialStrategy(['feat: x']);
     const result = await generateCommitMessage(DEFAULT_CONTEXT, strategy);

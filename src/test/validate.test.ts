@@ -23,6 +23,17 @@ suite('validateMessage', () => {
       `expected a header-length problem, got: ${JSON.stringify(result.problems)}`,
     );
   });
+
+  test('degrades to valid when a rule has no implementation', async () => {
+    // Repo configs that reference plugin rules resolve to raw configs the
+    // bundled @commitlint/lint cannot run; it throws "Found rules without
+    // implementation". Validation must pass through, never lose the message.
+    const result = await validateMessage('feat: ok', {
+      'some-nonexistent-plugin-rule': [2, 'always'],
+    });
+    assert.strictEqual(result.valid, true);
+    assert.deepStrictEqual(result.problems, []);
+  });
 });
 
 suite('resolveRules', () => {

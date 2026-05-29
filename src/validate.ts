@@ -64,9 +64,17 @@ export async function validateMessage(
     default: (message: string, rules: RawRules) => Promise<LintOutcome>;
   };
   const lint = mod.default;
-  const outcome = await lint(message, rules);
-  return {
-    valid: outcome.valid,
-    problems: outcome.errors.map((e) => e.message),
-  };
+  try {
+    const outcome = await lint(message, rules);
+    return {
+      valid: outcome.valid,
+      problems: outcome.errors.map((e) => e.message),
+    };
+  } catch {
+    // The repo's resolved rules can reference rules our bundled
+    // @commitlint/lint doesn't implement (plugin rules), which makes lint
+    // throw. Validation is additive — degrade to "valid" so we never lose the
+    // generated message over a config we can't lint.
+    return { valid: true, problems: [] };
+  }
 }

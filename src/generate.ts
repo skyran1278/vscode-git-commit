@@ -192,11 +192,20 @@ export async function generateCommitMessage(
   const best = { message, problems: result.problems };
 
   for (let i = 0; i < maxRetries && !result.valid; i++) {
-    const retried = await generate({ ...context, violations: result.problems });
-    result = await validate(retried);
-    if (result.problems.length < best.problems.length) {
-      best.message = retried;
-      best.problems = result.problems;
+    try {
+      const retried = await generate({
+        ...context,
+        violations: result.problems,
+      });
+      result = await validate(retried);
+      if (result.problems.length < best.problems.length) {
+        best.message = retried;
+        best.problems = result.problems;
+      }
+    } catch {
+      // A retry can fail transiently (e.g. an empty model response). Keep the
+      // best attempt so far rather than failing the whole command.
+      break;
     }
   }
 
