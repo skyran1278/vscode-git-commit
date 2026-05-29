@@ -9,6 +9,8 @@ interface LintOutcome {
 export interface ValidationResult {
   valid: boolean;
   problems: string[];
+  /** True when linting was skipped because the rules could not be run. */
+  degraded?: boolean;
 }
 
 export interface ResolveRulesOptions {
@@ -66,6 +68,8 @@ export async function validateMessage(
   const lint = mod.default;
   try {
     const outcome = await lint(message, rules);
+    // Only severity-2 errors are surfaced; severity-1 warnings (e.g.
+    // body-leading-blank) are intentionally omitted to avoid noisy feedback.
     return {
       valid: outcome.valid,
       problems: outcome.errors.map((e) => e.message),
@@ -75,6 +79,6 @@ export async function validateMessage(
     // @commitlint/lint doesn't implement (plugin rules), which makes lint
     // throw. Validation is additive — degrade to "valid" so we never lose the
     // generated message over a config we can't lint.
-    return { valid: true, problems: [] };
+    return { valid: true, problems: [], degraded: true };
   }
 }

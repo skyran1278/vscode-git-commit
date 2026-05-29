@@ -349,7 +349,7 @@ suite('buildPrompt with commitlintRules', () => {
         subjectCase: { condition: 'always', cases: ['lower-case'] },
       },
     });
-    assert.ok(prompt.includes('must be lower-case case'));
+    assert.ok(prompt.includes('must be lower-case'));
   });
 
   test('adapts subject full stop guidance', () => {

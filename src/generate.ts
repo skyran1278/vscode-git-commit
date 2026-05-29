@@ -67,9 +67,9 @@ function commitlintRulesLines(
   if (rules.subjectCase) {
     const { condition, cases } = rules.subjectCase;
     if (condition === 'always') {
-      lines.push(`- Description must be ${cases.join('/')} case`);
+      lines.push(`- Description must be ${cases.join('/')}`);
     } else {
-      lines.push(`- Description must not be ${cases.join('/')} case`);
+      lines.push(`- Description must not be ${cases.join('/')}`);
     }
   }
   if (rules.subjectFullStop) {

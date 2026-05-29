@@ -33,6 +33,7 @@ suite('validateMessage', () => {
     });
     assert.strictEqual(result.valid, true);
     assert.deepStrictEqual(result.problems, []);
+    assert.strictEqual(result.degraded, true);
   });
 });
 

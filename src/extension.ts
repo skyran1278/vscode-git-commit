@@ -4,13 +4,13 @@ import { loadCommitlintRules } from './commitlint';
 import { buildPrompt, generateCommitMessage } from './generate';
 import { getGitContext } from './git';
 import { selectModel } from './models';
-import { resolveRules, validateMessage } from './validate';
 import {
   ClaudeCliStrategy,
   LLMStrategy,
   PerplexityStrategy,
   VscodeLmStrategy,
 } from './strategies';
+import { resolveRules, validateMessage } from './validate';
 
 interface Repository {
   rootUri: vscode.Uri;
@@ -179,14 +179,28 @@ export function activate(context: vscode.ExtensionContext) {
               subjectLength: gitContext.subjectLength,
               lineLength: gitContext.lineLength,
             });
-            const generated = await generateCommitMessage(gitContext, strategy, {
-              validate: (message) => validateMessage(message, rules),
-              onWarnings: (warnings) => {
-                vscode.window.showWarningMessage(
-                  `Generated commit message may not follow all rules:\n- ${warnings.join('\n- ')}`,
-                );
+            const generated = await generateCommitMessage(
+              gitContext,
+              strategy,
+              {
+                validate: async (message) => {
+                  const result = await validateMessage(message, rules);
+                  if (result.degraded) {
+                    outputChannel.warn(
+                      'commitlint validation skipped: repo rules could not be ' +
+                        'linted in-process (likely plugin rules); the generated ' +
+                        'message was not validated.',
+                    );
+                  }
+                  return result;
+                },
+                onWarnings: (warnings) => {
+                  vscode.window.showWarningMessage(
+                    `Generated commit message may not follow all rules:\n- ${warnings.join('\n- ')}`,
+                  );
+                },
               },
-            });
+            );
             repo.inputBox.value = userMessage
               ? `${userMessage}\n\n${generated}`
               : generated;
