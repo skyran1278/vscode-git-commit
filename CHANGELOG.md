@@ -6,6 +6,13 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.18]
+
+- Generated commit messages are now validated against your commitlint rules and automatically retried when they violate them
+- When a retry can't produce a fully valid message, the best generated attempt is preserved instead of being discarded
+- Repository rules that can't be linted are now bypassed gracefully, with a warning shown when validation is skipped
+- Updated the available Perplexity model options
+
 ## [0.0.17]
 
 - Fixed repository selection when generating commit messages from the SCM context menu
