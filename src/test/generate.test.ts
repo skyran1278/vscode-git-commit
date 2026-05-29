@@ -138,6 +138,142 @@ suite('generateCommitMessage', () => {
   });
 });
 
+type ValidatorResult = { valid: boolean; problems: string[] };
+
+function makeValidator(sequence: ValidatorResult[]) {
+  let i = 0;
+  const calls: string[] = [];
+  const fn = async (message: string): Promise<ValidatorResult> => {
+    calls.push(message);
+    return sequence[Math.min(i++, sequence.length - 1)];
+  };
+  return Object.assign(fn, { calls });
+}
+
+function makeSequentialStrategy(responses: string[]): {
+  strategy: LLMStrategy;
+  prompts: string[];
+} {
+  const prompts: string[] = [];
+  let i = 0;
+  const strategy: LLMStrategy = {
+    sendRequest: async (p: string) => {
+      prompts.push(p);
+      return responses[Math.min(i++, responses.length - 1)];
+    },
+  };
+  return { strategy, prompts };
+}
+
+suite('generateCommitMessage validation + retry', () => {
+  test('returns first message without retry when it is valid', async () => {
+    const validator = makeValidator([{ valid: true, problems: [] }]);
+    const { strategy, prompts } = makeSequentialStrategy(['feat: valid one']);
+    const result = await generateCommitMessage(DEFAULT_CONTEXT, strategy, {
+      validate: validator,
+    });
+    assert.strictEqual(result, 'feat: valid one');
+    assert.strictEqual(prompts.length, 1, 'should not retry');
+    assert.strictEqual(validator.calls.length, 1);
+  });
+
+  test('retries once with violations fed back, returns the fixed message', async () => {
+    const validator = makeValidator([
+      {
+        valid: false,
+        problems: ['header must not be longer than 50 characters'],
+      },
+      { valid: true, problems: [] },
+    ]);
+    const { strategy, prompts } = makeSequentialStrategy([
+      'feat: a header that is far too long to be acceptable here',
+      'feat: short header',
+    ]);
+    const result = await generateCommitMessage(DEFAULT_CONTEXT, strategy, {
+      validate: validator,
+    });
+    assert.strictEqual(result, 'feat: short header');
+    assert.strictEqual(prompts.length, 2, 'should retry exactly once');
+    assert.ok(
+      prompts[1].includes('header must not be longer than 50 characters'),
+      'retry prompt must include the violation feedback',
+    );
+  });
+
+  test('after retries exhausted returns best attempt and warns', async () => {
+    const validator = makeValidator([
+      { valid: false, problems: ['p1', 'p2'] },
+      { valid: false, problems: ['p1'] },
+    ]);
+    const { strategy } = makeSequentialStrategy(['msg one', 'msg two']);
+    const warnings: string[][] = [];
+    const result = await generateCommitMessage(DEFAULT_CONTEXT, strategy, {
+      validate: validator,
+      onWarnings: (w) => warnings.push(w),
+    });
+    assert.strictEqual(
+      result,
+      'msg two',
+      'returns the attempt with fewer problems',
+    );
+    assert.deepStrictEqual(warnings, [['p1']]);
+  });
+
+  test('keeps the earlier attempt on a tie in problem count', async () => {
+    const validator = makeValidator([
+      { valid: false, problems: ['p1'] },
+      { valid: false, problems: ['p2'] },
+    ]);
+    const { strategy } = makeSequentialStrategy(['first', 'second']);
+    const result = await generateCommitMessage(DEFAULT_CONTEXT, strategy, {
+      validate: validator,
+    });
+    assert.strictEqual(result, 'first');
+  });
+
+  test('returns the first attempt when a retry yields an empty response', async () => {
+    const validator = makeValidator([{ valid: false, problems: ['p1'] }]);
+    const { strategy } = makeSequentialStrategy([
+      'feat: usable first attempt',
+      '',
+    ]);
+    const warnings: string[][] = [];
+    const result = await generateCommitMessage(DEFAULT_CONTEXT, strategy, {
+      validate: validator,
+      onWarnings: (w) => warnings.push(w),
+    });
+    assert.strictEqual(
+      result,
+      'feat: usable first attempt',
+      'a flaky empty retry must not discard the usable first attempt',
+    );
+    assert.deepStrictEqual(warnings, [['p1']]);
+  });
+
+  test('without a validator behaves as before (no validation, no retry)', async () => {
+    const { strategy, prompts } = makeSequentialStrategy(['feat: x']);
+    const result = await generateCommitMessage(DEFAULT_CONTEXT, strategy);
+    assert.strictEqual(result, 'feat: x');
+    assert.strictEqual(prompts.length, 1);
+  });
+});
+
+suite('buildPrompt violations feedback', () => {
+  test('includes the violations section when violations present', () => {
+    const prompt = buildPrompt({
+      ...DEFAULT_CONTEXT,
+      violations: ['header must not be longer than 50 characters'],
+    });
+    assert.ok(prompt.includes('previous attempt'));
+    assert.ok(prompt.includes('header must not be longer than 50 characters'));
+  });
+
+  test('omits the violations section when none present', () => {
+    const prompt = buildPrompt(DEFAULT_CONTEXT);
+    assert.ok(!prompt.includes('previous attempt'));
+  });
+});
+
 suite('buildPrompt unified format', () => {
   test('always includes Conventional Commits heading', () => {
     const prompt = buildPrompt(DEFAULT_CONTEXT);
@@ -213,7 +349,7 @@ suite('buildPrompt with commitlintRules', () => {
         subjectCase: { condition: 'always', cases: ['lower-case'] },
       },
     });
-    assert.ok(prompt.includes('must be lower-case case'));
+    assert.ok(prompt.includes('must be lower-case'));
   });
 
   test('adapts subject full stop guidance', () => {

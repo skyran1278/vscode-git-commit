@@ -10,6 +10,19 @@ export interface CommitContext {
   commitlintRules?: CommitlintRules;
   subjectLength?: number;
   lineLength?: number;
+  /** Problems from a previous attempt, fed back so the model can fix them. */
+  violations?: string[];
+}
+
+export interface GenerateOptions {
+  /** Validates a message; absent means no validation and no retry. */
+  validate?: (
+    message: string,
+  ) => Promise<{ valid: boolean; problems: string[] }>;
+  /** Max number of retries after the first attempt (default 1). */
+  maxRetries?: number;
+  /** Called with remaining problems when the final message is still invalid. */
+  onWarnings?: (warnings: string[]) => void;
 }
 
 const DEFAULT_TYPES = [
@@ -54,9 +67,9 @@ function commitlintRulesLines(
   if (rules.subjectCase) {
     const { condition, cases } = rules.subjectCase;
     if (condition === 'always') {
-      lines.push(`- Description must be ${cases.join('/')} case`);
+      lines.push(`- Description must be ${cases.join('/')}`);
     } else {
-      lines.push(`- Description must not be ${cases.join('/')} case`);
+      lines.push(`- Description must not be ${cases.join('/')}`);
     }
   }
   if (rules.subjectFullStop) {
@@ -140,7 +153,13 @@ ${context.diff}
 
 - Recent commits:
 ${context.log}
-${context.userMessage ? `\n- User instructions:\n${context.userMessage}\n` : ''}
+${context.userMessage ? `\n- User instructions:\n${context.userMessage}\n` : ''}${
+    context.violations?.length
+      ? `\n## Fix these issues from your previous attempt\n\n${context.violations
+          .map((v) => `- ${v}`)
+          .join('\n')}\n`
+      : ''
+  }
 ## Your task
 
 Generate a single git commit message following the Conventional Commits format above.
@@ -152,12 +171,46 @@ Output only the commit message with no code fences, quotes, or explanation.`;
 export async function generateCommitMessage(
   context: CommitContext,
   strategy: LLMStrategy,
+  options: GenerateOptions = {},
 ): Promise<string> {
-  const prompt = buildPrompt(context);
-  const message = (await strategy.sendRequest(prompt)).trim();
+  const { validate, maxRetries = 1, onWarnings } = options;
 
-  if (!message) {
-    throw new Error('Language model returned an empty response');
+  const generate = async (ctx: CommitContext): Promise<string> => {
+    const message = (await strategy.sendRequest(buildPrompt(ctx))).trim();
+    if (!message) {
+      throw new Error('Language model returned an empty response');
+    }
+    return message;
+  };
+
+  const message = await generate(context);
+  if (!validate) {
+    return message;
   }
-  return message;
+
+  let result = await validate(message);
+  const best = { message, problems: result.problems };
+
+  for (let i = 0; i < maxRetries && !result.valid; i++) {
+    try {
+      const retried = await generate({
+        ...context,
+        violations: result.problems,
+      });
+      result = await validate(retried);
+      if (result.problems.length < best.problems.length) {
+        best.message = retried;
+        best.problems = result.problems;
+      }
+    } catch {
+      // A retry can fail transiently (e.g. an empty model response). Keep the
+      // best attempt so far rather than failing the whole command.
+      break;
+    }
+  }
+
+  if (best.problems.length > 0) {
+    onWarnings?.(best.problems);
+  }
+  return best.message;
 }

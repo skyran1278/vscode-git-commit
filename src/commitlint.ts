@@ -91,9 +91,16 @@ import('@commitlint/load')
   .catch(() => process.exit(1));
 `;
 
+export interface LoadedCommitlint {
+  /** The full effective commitlint rules, fed to `@commitlint/lint`. */
+  raw: Record<string, RawRule>;
+  /** The readable subset used to describe rules in the prompt. */
+  parsed?: CommitlintRules;
+}
+
 export function loadCommitlintRules(
   repoRoot: string,
-): Promise<CommitlintRules | undefined> {
+): Promise<LoadedCommitlint | undefined> {
   return new Promise((resolve) => {
     execFile(
       'node',
@@ -106,7 +113,11 @@ export function loadCommitlintRules(
         }
         try {
           const raw = JSON.parse(stdout.trim()) as Record<string, RawRule>;
-          resolve(parseRules(raw));
+          if (Object.keys(raw).length === 0) {
+            resolve(undefined);
+            return;
+          }
+          resolve({ raw, parsed: parseRules(raw) });
         } catch {
           resolve(undefined);
         }

@@ -10,6 +10,7 @@ import {
   PerplexityStrategy,
   VscodeLmStrategy,
 } from './strategies';
+import { resolveRules, validateMessage } from './validate';
 
 interface Repository {
   rootUri: vscode.Uri;
@@ -136,7 +137,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       const userMessage = repo.inputBox.value.trim();
       const repoRoot = repo.rootUri.fsPath;
-      const [gitContext, commitlintRules] = await Promise.all([
+      const [gitContext, commitlint] = await Promise.all([
         getGitContext(repo, userMessage || undefined),
         loadCommitlintRules(repoRoot),
       ]);
@@ -168,11 +169,38 @@ export function activate(context: vscode.ExtensionContext) {
               'inputValidationLength',
               72,
             );
-            if (commitlintRules) {
-              gitContext.commitlintRules = commitlintRules;
+            if (commitlint?.parsed) {
+              gitContext.commitlintRules = commitlint.parsed;
             }
             outputChannel.debug(buildPrompt(gitContext));
-            const generated = await generateCommitMessage(gitContext, strategy);
+
+            const rules = await resolveRules({
+              rawRules: commitlint?.raw,
+              subjectLength: gitContext.subjectLength,
+              lineLength: gitContext.lineLength,
+            });
+            const generated = await generateCommitMessage(
+              gitContext,
+              strategy,
+              {
+                validate: async (message) => {
+                  const result = await validateMessage(message, rules);
+                  if (result.degraded) {
+                    outputChannel.warn(
+                      'commitlint validation skipped: repo rules could not be ' +
+                        'linted in-process (likely plugin rules); the generated ' +
+                        'message was not validated.',
+                    );
+                  }
+                  return result;
+                },
+                onWarnings: (warnings) => {
+                  vscode.window.showWarningMessage(
+                    `Generated commit message may not follow all rules:\n- ${warnings.join('\n- ')}`,
+                  );
+                },
+              },
+            );
             repo.inputBox.value = userMessage
               ? `${userMessage}\n\n${generated}`
               : generated;
