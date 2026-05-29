@@ -15,7 +15,7 @@ pnpm run format       # Prettier format
 pnpm run test         # Compile tests + extension, then run vscode-test
 ```
 
-To run only the unit tests (no VSCode host needed), compile first then run the test runner directly — but note that `extension.test.ts` requires a VSCode host while `generate.test.ts` uses pure Node mocks.
+To run the unit tests, compile first then run the test runner. Note that all suites need a `vscode` module available: `extension.test.ts` requires a full VSCode host, and `generate.test.ts`/`validate.test.ts` inject Node-level mocks but still transitively import `vscode` (via `strategies/index → vscode-lm`), so they need either the VSCode host or a `vscode` stub.
 
 ## Architecture
 
@@ -38,7 +38,7 @@ To run only the unit tests (no VSCode host needed), compile first then run the t
 
 **Two test suites**:
 
-- `src/test/generate.test.ts` — pure unit tests, inject fake child processes via `generate._impl.spawnFn`
+- `src/test/generate.test.ts` — unit tests that inject fake child processes via `generate._impl.spawnFn`; needs a `vscode` host/stub (transitive import via `strategies`)
 - `src/test/extension.test.ts` — integration tests requiring a VSCode host instance
 
 ## Key constraint
