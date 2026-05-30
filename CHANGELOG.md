@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.20]
+
+- Claude CLI: disabled all hooks when invoking the `claude` CLI, preventing user-configured hooks from interfering with commit message generation
+
 ## [0.0.19]
 
 - Improved commit message generation by restructuring the prompt (git diff now placed at the end), which can yield more accurate results.
