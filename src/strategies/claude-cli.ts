@@ -16,7 +16,13 @@ export class ClaudeCliStrategy implements LLMStrategy {
 
   sendRequest(prompt: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      const args = ['--print', '--output-format', 'text'];
+      const args = [
+        '--print',
+        '--output-format',
+        'text',
+        '--settings',
+        '{"disableAllHooks":true}',
+      ];
       if (this.model) {
         args.push('--model', this.model);
       }
