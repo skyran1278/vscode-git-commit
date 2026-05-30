@@ -6,6 +6,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.0.19]
+
+- Improved commit message generation by restructuring the prompt (git diff now placed at the end), which can yield more accurate results.
+
 ## [0.0.18]
 
 - Generated commit messages are now validated against your commitlint rules and automatically retried when they violate them
