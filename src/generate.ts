@@ -146,13 +146,13 @@ BREAKING CHANGE: \`notify\` method signature changed
 
 ## Context
 
-- Current git diff:
-${context.diff}
-
 - Current branch: ${context.branch}
 
 - Recent commits:
 ${context.log}
+
+- Current git diff:
+${context.diff}
 ${context.userMessage ? `\n- User instructions:\n${context.userMessage}\n` : ''}${
     context.violations?.length
       ? `\n## Fix these issues from your previous attempt\n\n${context.violations
